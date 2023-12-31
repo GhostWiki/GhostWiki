@@ -1,6 +1,6 @@
 # GhostWiki
 
-GhostWiki users can effortlesly store and manage files within nested folders
+[GhostWiki](https://github.com/GhostWiki/GhostWiki) users can effortlesly store and manage files within nested folders
 
 
 ## 📚 Project Definition
