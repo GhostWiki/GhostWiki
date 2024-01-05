@@ -1106,7 +1106,7 @@ input.scroll-box-search, .scroll-box-header-item {
 }
 .scroll-box[refs="shelf-sort@all-book-list"] [data-action="remove"],
 .scroll-box[refs="shelf-sort@all-book-list"] [data-action="move_up"],
-.scroll-box[refs="shelf-sort@all-book-list"] [data-action="move_down"],
+.scroll-box[refs="shelf-sort@all-book-list"] [data-action="move_down"]
 {
   display: none;
 }
