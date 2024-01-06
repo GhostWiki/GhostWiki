@@ -2,14 +2,14 @@
 
 namespace BookStack\Entities;
 
-use BookStack\Entities\Models\Book;
-use BookStack\Entities\Tools\ShelfContext;
+use App\Entities\Models\Category;
+use App\Entities\Tools\CategoryContext;
 use Illuminate\View\View;
 
 class BreadcrumbsViewComposer
 {
     public function __construct(
-        protected ShelfContext $shelfContext
+        protected CategoryContext $categoryContext
     ) {
     }
 
@@ -21,8 +21,8 @@ class BreadcrumbsViewComposer
         $crumbs = $view->getData()['crumbs'];
         $firstCrumb = $crumbs[0] ?? null;
 
-        if ($firstCrumb instanceof Book) {
-            $shelf = $this->shelfContext->getContextualShelfForBook($firstCrumb);
+        if ($firstCrumb instanceof Category) {
+            $shelf = $this->categoryContext->getContextualShelfForCategory($firstCrumb);
             if ($shelf) {
                 array_unshift($crumbs, $shelf);
                 $view->with('crumbs', $crumbs);
