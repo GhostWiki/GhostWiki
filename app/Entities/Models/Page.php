@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 /**
  * Class Page.
  *
- * @property int          $chapter_id
+ * @property int          $category_id
  * @property string       $html
  * @property string       $markdown
  * @property string       $text
@@ -23,12 +23,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property bool         $draft
  * @property int          $revision_count
  * @property string       $editor
- * @property Chapter      $chapter
+ * @property Category     $category
  * @property Collection   $attachments
  * @property Collection   $revisions
  * @property PageRevision $currentRevision
  */
-class Page extends BookChild
+class Page extends Category
 {
     use HasFactory;
 
@@ -58,21 +58,21 @@ class Page extends BookChild
     }
 
     /**
-     * Get the chapter that this page is in, If applicable.
+     * Get the category that this page is in, If applicable.
      *
      * @return BelongsTo
      */
-    public function chapter()
+    public function category()
     {
-        return $this->belongsTo(Chapter::class);
+        return $this->belongsTo(Category::class);
     }
 
     /**
-     * Check if this page has a chapter.
+     * Check if this page has a category.
      */
-    public function hasChapter(): bool
+    public function hasCategory(): bool
     {
-        return $this->chapter()->count() > 0;
+        return $this->category()->count() > 0;
     }
 
     /**
@@ -122,15 +122,19 @@ class Page extends BookChild
      */
     public function getUrl(string $path = ''): string
     {
-        $parts = [
-            'books',
-            urlencode($this->book_slug ?? $this->book->slug),
-            $this->draft ? 'draft' : 'page',
-            $this->draft ? $this->id : urlencode($this->slug),
-            trim($path, '/'),
-        ];
+        $parts = [];
 
-        return url('/' . implode('/', $parts));
+        $category = $this;
+        while($category->parent) {
+            $parts[] = urlencode($category->parent->slug);
+            $category = $category->parent;
+        }
+
+        $parts[] = 'categories';
+        $parts[] = urlencode($this->slug);
+        $parts[] = trim($path, '/');
+
+        return url('/' . implode('/', array_reverse($parts))); 
     }
 
     /**
@@ -147,11 +151,11 @@ class Page extends BookChild
     }
 
     /**
-     * Get a visible page by its book and page slugs.
+     * Get a visible page by its category tree and page slugs.
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public static function getBySlugs(string $bookSlug, string $pageSlug): self
+    public static function getBySlugs(string $categorySlug, string $pageSlug): self 
     {
-        return static::visible()->whereSlugs($bookSlug, $pageSlug)->firstOrFail();
+        return static::visible()->whereHas('category', function(Builder $query) use ($categorySlug) {$query->where('slug', $categorySlug);})->where('slug', $pageSlug)->firstOrFail();
     }
 }

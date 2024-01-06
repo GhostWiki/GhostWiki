@@ -5,25 +5,43 @@ namespace BookStack\Entities\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Chapter.
+ * Class Category.
  *
  * @property Collection<Page> $pages
  * @property string           $description
  */
-class Chapter extends BookChild
+class Category extends Model
 {
     use HasFactory;
     use HasHtmlDescription;
 
     public float $searchFactor = 1.2;
 
-    protected $fillable = ['name', 'description', 'priority'];
+    protected $fillable = ['name', 'description', 'priority', 'parent_id'];
     protected $hidden = ['pivot', 'deleted_at', 'description_html'];
 
+
+
     /**
-     * Get the pages that this chapter contains.
+     * Get the parent category of this category
+     */
+    public function parent() {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    /**
+     * Get all child categories of this category
+     */ 
+    public function children() {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+
+    /**
+     * Get the pages that this Category contains.
      *
      * @return HasMany<Page>
      */
@@ -33,14 +51,12 @@ class Chapter extends BookChild
     }
 
     /**
-     * Get the url of this chapter.
+     * Get the url of this Category.
      */
     public function getUrl(string $path = ''): string
     {
         $parts = [
-            'books',
-            urlencode($this->book_slug ?? $this->book->slug),
-            'chapter',
+            'category',
             urlencode($this->slug),
             trim($path, '/'),
         ];
@@ -49,7 +65,7 @@ class Chapter extends BookChild
     }
 
     /**
-     * Get the visible pages in this chapter.
+     * Get the visible pages in this Category.
      */
     public function getVisiblePages(): Collection
     {
@@ -64,8 +80,8 @@ class Chapter extends BookChild
      * Get a visible chapter by its book and page slugs.
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public static function getBySlugs(string $bookSlug, string $chapterSlug): self
+    public static function getBySlugs(string $categorySlug): self
     {
-        return static::visible()->whereSlugs($bookSlug, $chapterSlug)->firstOrFail();
+        return static::visible()->whereSlugs($categorySlug)->firstOrFail();
     }
 }
