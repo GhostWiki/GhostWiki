@@ -1,5 +1,8 @@
 <?php
 
+// Updated to reflect the new database structure: nested categories for pages
+// Pending further updates for comments... 
+
 namespace BookStack\Entities\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;

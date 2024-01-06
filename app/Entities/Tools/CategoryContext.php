@@ -1,5 +1,8 @@
 <?php
 
+// Updated to reflect the new database structure: nested categories for pages
+// Pending further updates for comments... 
+
 namespace BookStack\Entities\Tools;
 
 use App\Entities\Models\Category;

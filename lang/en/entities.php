@@ -168,9 +168,10 @@ return [
     'books_copy' => 'Copy Book',
     'books_copy_success' => 'Book successfully copied',
 
-    // Chapters
-    'chapter' => 'Chapter',
-    'chapters' => 'Chapters',
+    // Categories
+    'category' => 'Folder',
+    'categories' => 'Folders',
+    'category_navigation' => 'Folder Navigation',
     'x_chapters' => ':count Chapter|:count Chapters',
     'chapters_popular' => 'Popular Chapters',
     'chapters_new' => 'New Chapter',

@@ -1,54 +1,39 @@
+
+{{-- Updated to reflect the new database structure: nested categories for pages --}}
+
 <nav class="breadcrumbs text-center" aria-label="{{ trans('common.breadcrumb') }}">
+
     <?php $breadcrumbCount = 0; ?>
-
-    {{-- Show top level books item --}}
-    @if (count($crumbs) > 0 && ($crumbs[0] ?? null) instanceof  \BookStack\Entities\Models\Book)
-        <a href="{{  url('/books')  }}" class="text-book icon-list-item outline-hover">
-            <span>@icon('books')</span>
-            <span>{{ trans('entities.books') }}</span>
-        </a>
-        <?php $breadcrumbCount++; ?>
+  
+    @if (count($crumbs) > 0 && ($crumbs[0] ?? null) instanceof \App\Entities\Models\Category)
+  
+      <a href="{{ url('/categories') }}" class="text-category icon-list-item outline-hover">
+        <span>@icon('books')</span>  
+        <span>{{ trans('entities.categories') }}</span>
+      </a>
+      <?php $breadcrumbCount++; ?>
+  
     @endif
-
-    {{-- Show top level shelves item --}}
-    @if (count($crumbs) > 0 && ($crumbs[0] ?? null) instanceof  \BookStack\Entities\Models\Bookshelf)
-        <a href="{{  url('/shelves')  }}" class="text-bookshelf icon-list-item outline-hover">
-            <span>@icon('bookshelf')</span>
-            <span>{{ trans('entities.shelves') }}</span>
-        </a>
-        <?php $breadcrumbCount++; ?>
-    @endif
-
+  
     @foreach($crumbs as $key => $crumb)
-        <?php $isEntity = ($crumb instanceof \BookStack\Entities\Models\Entity); ?>
-
-        @if (is_null($crumb))
-            <?php continue; ?>
+  
+      @if($crumb instanceof \App\Entities\Models\Category || $crumb instanceof \App\Entities\Models\Page)
+  
+        @if($breadcrumbCount > 0)
+          <div class="separator">@icon('chevron-right')</div>  
         @endif
-        @if ($breadcrumbCount !== 0 && !$isEntity)
-            <div class="separator">@icon('chevron-right')</div>
-        @endif
-
-        @if (is_string($crumb))
-            <a href="{{  url($key)  }}">
-                {{ $crumb }}
-            </a>
-        @elseif (is_array($crumb))
-            <a href="{{  url($key)  }}" class="icon-list-item outline-hover">
-                <span>@icon($crumb['icon'])</span>
-                <span>{{ $crumb['text'] }}</span>
-            </a>
-        @elseif($isEntity && userCan('view', $crumb))
-            @if($breadcrumbCount > 0)
-                @include('entities.breadcrumb-listing', ['entity' => $crumb])
-            @endif
-            <a href="{{ $crumb->getUrl() }}" class="text-{{$crumb->getType()}} icon-list-item outline-hover">
-                <span>@icon($crumb->getType())</span>
-                <span>
-                    {{ $crumb->getShortName() }}
-                </span>
-            </a>
-        @endif
+  
+        @include('entities.breadcrumb-listing', ['entity' => $crumb])
+  
+        <a href="{{ $crumb->getUrl() }}" class="icon-list-item outline-hover">
+          <span>@icon($crumb->getType())</span>
+          <span>{{ $crumb->name }}</span>
+        </a>
+  
         <?php $breadcrumbCount++; ?>
+  
+      @endif
+  
     @endforeach
-</nav>
+  
+  </nav>

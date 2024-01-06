@@ -14,7 +14,7 @@ use BookStack\Exceptions\PermissionsException;
 use BookStack\Facades\Activity;
 use Exception;
 
-class ChapterRepo
+class CategoryRepo
 {
     public function __construct(
         protected BaseRepo $baseRepo

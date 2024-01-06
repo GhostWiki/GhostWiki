@@ -176,8 +176,8 @@ class RolePermissionsTableSeeder extends Seeder
             17 => 
             array (
                 'id' => 36,
-                'name' => 'chapter-create-all',
-                'display_name' => 'Create All Chapters',
+                'name' => 'category-create-all',
+                'display_name' => 'Create All Categories',
                 'description' => NULL,
                 'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
                 'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
@@ -185,8 +185,8 @@ class RolePermissionsTableSeeder extends Seeder
             18 => 
             array (
                 'id' => 37,
-                'name' => 'chapter-create-own',
-                'display_name' => 'Create Own Chapters',
+                'name' => 'category-create-own',
+                'display_name' => 'Create Own Categories',
                 'description' => NULL,
                 'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
                 'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),

@@ -1,5 +1,7 @@
 <?php
 
+
+
 namespace BookStack\Entities\Controllers;
 
 use BookStack\Activity\Models\View;
@@ -8,7 +10,7 @@ use BookStack\Activity\Tools\UserEntityWatchOptions;
 // use BookStack\Entities\Models\Book;
 use BookStack\Entities\Models\Page;
 use BookStack\Entities\Repos\PageRepo;
-use BookStack\Entities\Tools\BookContents;
+//use BookStack\Entities\Tools\BookContents;
 use BookStack\Entities\Tools\Cloner;
 use BookStack\Entities\Tools\NextPreviousContentLocator;
 use BookStack\Entities\Tools\PageContent;

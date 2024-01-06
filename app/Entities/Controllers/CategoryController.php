@@ -4,9 +4,9 @@ namespace BookStack\Entities\Controllers;
 
 use BookStack\Activity\Models\View;
 use BookStack\Activity\Tools\UserEntityWatchOptions;
-use BookStack\Entities\Models\Book;
-use BookStack\Entities\Repos\ChapterRepo;
-use BookStack\Entities\Tools\BookContents;
+//use BookStack\Entities\Models\Book;
+use BookStack\Entities\Repos\CategoryRepo;
+//use BookStack\Entities\Tools\BookContents;
 use BookStack\Entities\Tools\Cloner;
 use BookStack\Entities\Tools\HierarchyTransformer;
 use BookStack\Entities\Tools\NextPreviousContentLocator;
@@ -20,33 +20,33 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
-class ChapterController extends Controller
+class CategoryController extends Controller
 {
     public function __construct(
-        protected ChapterRepo $chapterRepo,
+        protected CategoryRepo $categoryRepo,
         protected ReferenceFetcher $referenceFetcher
     ) {
     }
 
     /**
-     * Show the form for creating a new chapter.
+     * Show the form for creating a new Category
      */
-    public function create(string $bookSlug)
+    public function create(string $categorySlug)
     {
-        $book = Book::visible()->where('slug', '=', $bookSlug)->firstOrFail();
-        $this->checkOwnablePermission('chapter-create', $book);
+        $category = Category::visible()->where('slug', '=', $categorySlug)->firstOrFail();
+        $this->checkOwnablePermission('category-create', $category);
 
-        $this->setPageTitle(trans('entities.chapters_create'));
+        $this->setPageTitle(trans('entities.category_create'));
 
-        return view('chapters.create', ['book' => $book, 'current' => $book]);
+        return view('category.create', ['category' => $category, 'current' => $category]);
     }
 
     /**
-     * Store a newly created chapter in storage.
+     * Store a newly created Category in storage.
      *
      * @throws ValidationException
      */
-    public function store(Request $request, string $bookSlug)
+    public function store(Request $request, $categorySlug)
     {
         $validated = $this->validate($request, [
             'name'             => ['required', 'string', 'max:255'],
@@ -54,16 +54,16 @@ class ChapterController extends Controller
             'tags'             => ['array'],
         ]);
 
-        $book = Book::visible()->where('slug', '=', $bookSlug)->firstOrFail();
-        $this->checkOwnablePermission('chapter-create', $book);
+        $category = Category::visible()->where('slug', '=', $categorySlug)->firstOrFail();
+        $this->checkOwnablePermission('category-create', $category);
 
-        $chapter = $this->chapterRepo->create($validated, $book);
+        $category = $this->categoryRepo->create($validated, $category);
 
-        return redirect($chapter->getUrl());
+        return redirect($category->getUrl());
     }
 
     /**
-     * Display the specified chapter.
+     * Display the specified Category.
      */
     public function show(string $bookSlug, string $chapterSlug)
     {
@@ -77,7 +77,7 @@ class ChapterController extends Controller
 
         $this->setPageTitle($chapter->getShortName());
 
-        return view('chapters.show', [
+        return view('categories.show', [
             'book'           => $chapter->book,
             'chapter'        => $chapter,
             'current'        => $chapter,
@@ -91,7 +91,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Show the form for editing the specified chapter.
+     * Show the form for editing the specified Category.
      */
     public function edit(string $bookSlug, string $chapterSlug)
     {
@@ -104,7 +104,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Update the specified chapter in storage.
+     * Update the specified Category in storage.
      *
      * @throws NotFoundException
      */
@@ -125,7 +125,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Shows the page to confirm deletion of this chapter.
+     * Shows the page to confirm deletion of this Category.
      *
      * @throws NotFoundException
      */
@@ -140,7 +140,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Remove the specified chapter from storage.
+     * Remove the specified Category from storage.
      *
      * @throws NotFoundException
      * @throws Throwable
@@ -156,7 +156,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Show the page for moving a chapter.
+     * Show the page for moving a Category.
      *
      * @throws NotFoundException
      */
@@ -174,7 +174,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Perform the move action for a chapter.
+     * Perform the move action for a Category.
      *
      * @throws NotFoundException|NotifyException
      */
@@ -203,7 +203,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Show the view to copy a chapter.
+     * Show the view to copy a Category.
      *
      * @throws NotFoundException
      */
@@ -221,7 +221,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Create a copy of a chapter within the requested target destination.
+     * Create a copy of a Category within the requested target destination.
      *
      * @throws NotFoundException
      * @throws Throwable
@@ -248,19 +248,5 @@ class ChapterController extends Controller
 
         return redirect($chapterCopy->getUrl());
     }
-
-    /**
-     * Convert the chapter to a book.
-     */
-    public function convertToBook(HierarchyTransformer $transformer, string $bookSlug, string $chapterSlug)
-    {
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
-        $this->checkOwnablePermission('chapter-update', $chapter);
-        $this->checkOwnablePermission('chapter-delete', $chapter);
-        $this->checkPermission('book-create-all');
-
-        $book = $transformer->transformChapterToBook($chapter);
-
-        return redirect($book->getUrl());
-    }
+    
 }

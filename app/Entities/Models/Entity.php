@@ -1,5 +1,8 @@
 <?php
 
+// Updated to reflect the new database structure: nested categories for pages
+// Pending further updates for comments... 
+
 namespace BookStack\Entities\Models;
 
 use BookStack\Activity\Models\Activity;
@@ -121,12 +124,12 @@ abstract class Entity extends Model implements Sluggable, Favouritable, Viewable
             return true;
         }
 
-        if (($entity instanceof BookChild) && $this instanceof Book) {
+/*         if (($entity instanceof BookChild) && $this instanceof Book) {
             return $entity->book_id === $this->id;
-        }
+        } */
 
-        if ($entity instanceof Page && $this instanceof Chapter) {
-            return $entity->chapter_id === $this->id;
+        if ($entity instanceof Page && $this instanceof Category) {
+            return $entity->category_id === $this->id;
         }
 
         return false;
@@ -280,16 +283,19 @@ abstract class Entity extends Model implements Sluggable, Favouritable, Viewable
      * This is the "static" parent and does not include dynamic
      * relations such as shelves to books.
      */
-    public function getParent(): ?self
+
+    public function getParent(): ?self 
     {
         if ($this instanceof Page) {
-            return $this->chapter_id ? $this->chapter()->withTrashed()->first() : $this->book()->withTrashed()->first();
-        }
-        if ($this instanceof Chapter) {
-            return $this->book()->withTrashed()->first();
+            return $this->category_id ? $this->category()->first() : null;
         }
 
-        return null;
+        if ($this instanceof Category) {
+            return $this->parent_id ? $this->parent()->first() : null; 
+        }
+
+    return null;
+
     }
 
     /**
