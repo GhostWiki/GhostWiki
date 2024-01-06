@@ -15,8 +15,7 @@ return new class extends Migration
     {
         Schema::create('pages', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('book_id')->index();
-            $table->integer('chapter_id')->index();
+            $table->integer('category_id')->index();
             $table->string('name');
             $table->string('slug')->index();
             $table->longText('html');

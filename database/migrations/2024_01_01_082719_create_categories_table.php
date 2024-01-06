@@ -13,15 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('bookshelves', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name', 180);
-            $table->string('slug', 180)->index();
+            $table->integer('parent_id')->nullable()->index();
+            $table->string('slug')->index();
+            $table->text('name');
             $table->text('description');
-            $table->integer('created_by')->nullable()->index();
-            $table->integer('updated_by')->nullable()->index();
-            $table->integer('image_id')->nullable();
+            $table->integer('priority')->index();
             $table->timestamps();
+            $table->integer('created_by')->index();
+            $table->integer('updated_by')->index();
             $table->softDeletes();
             $table->unsignedInteger('owned_by')->index();
             $table->text('description_html');
@@ -35,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bookshelves');
+        Schema::dropIfExists('categories');
     }
 };
