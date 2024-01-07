@@ -3,8 +3,8 @@
 namespace BookStack\Entities\Repos;
 
 use BookStack\Activity\ActivityType;
-use BookStack\Entities\Models\Book;
-use BookStack\Entities\Models\Chapter;
+//use BookStack\Entities\Models\Book;
+use BookStack\Entities\Models\Category;
 use BookStack\Entities\Models\Entity;
 use BookStack\Entities\Tools\BookContents;
 use BookStack\Entities\Tools\TrashCan;

@@ -2,9 +2,9 @@
 
 namespace BookStack\Entities\Tools;
 
-use BookStack\Entities\Models\Book;
+//use BookStack\Entities\Models\Book;
 use BookStack\Entities\Models\BookChild;
-use BookStack\Entities\Models\Chapter;
+use BookStack\Entities\Models\Category;
 use BookStack\Entities\Models\Entity;
 use BookStack\Entities\Models\Page;
 use Illuminate\Support\Collection;

@@ -1,10 +1,13 @@
 <?php
 
+// Updated to reflect the new database structure: nested categories for pages
+// Pending further updates for comments... 
+
 namespace BookStack\Entities;
 
-use BookStack\Entities\Models\Book;
-use BookStack\Entities\Models\Bookshelf;
-use BookStack\Entities\Models\Chapter;
+//use BookStack\Entities\Models\Book;
+//use BookStack\Entities\Models\Bookshelf;
+use BookStack\Entities\Models\Category;
 use BookStack\Entities\Models\Entity;
 use BookStack\Entities\Models\Page;
 use BookStack\Entities\Models\PageRevision;
@@ -18,17 +21,17 @@ use BookStack\Entities\Models\PageRevision;
  */
 class EntityProvider
 {
-    public Bookshelf $bookshelf;
-    public Book $book;
-    public Chapter $chapter;
+    //public Bookshelf $bookshelf;
+    //public Book $book;
+    public Category $category;
     public Page $page;
     public PageRevision $pageRevision;
 
     public function __construct()
     {
-        $this->bookshelf = new Bookshelf();
-        $this->book = new Book();
-        $this->chapter = new Chapter();
+        //$this->bookshelf = new Bookshelf();
+        //$this->book = new Book();
+        $this->category = new Category();
         $this->page = new Page();
         $this->pageRevision = new PageRevision();
     }
@@ -42,9 +45,9 @@ class EntityProvider
     public function all(): array
     {
         return [
-            'bookshelf' => $this->bookshelf,
-            'book'      => $this->book,
-            'chapter'   => $this->chapter,
+            //'bookshelf' => $this->bookshelf,
+            //'book'      => $this->book,
+            'category'   => $this->category,
             'page'      => $this->page,
         ];
     }
