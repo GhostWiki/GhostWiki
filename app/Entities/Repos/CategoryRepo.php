@@ -22,56 +22,57 @@ class CategoryRepo
     }
 
     /**
-     * Get a chapter via the slug.
+     * Get a category via the slug.
      *
      * @throws NotFoundException
      */
-    public function getBySlug(string $bookSlug, string $chapterSlug): Chapter
+    public function getBySlug(string $categorySlug): Category
     {
-        $chapter = Chapter::visible()->whereSlugs($bookSlug, $chapterSlug)->first();
+        $category = Category::visible()->whereSlug($categorySlug)->first();
 
-        if ($chapter === null) {
-            throw new NotFoundException(trans('errors.chapter_not_found'));
+        if ($category === null) {
+            throw new NotFoundException(trans('errors.category_not_found'));
         }
 
-        return $chapter;
+        return $category;
     }
 
     /**
-     * Create a new chapter in the system.
+     * Create a new category in the system.
      */
-    public function create(array $input, Book $parentBook): Chapter
+    public function create(array $input): Category
     {
-        $chapter = new Chapter();
-        $chapter->book_id = $parentBook->id;
-        $chapter->priority = (new BookContents($parentBook))->getLastPriority() + 1;
-        $this->baseRepo->create($chapter, $input);
-        Activity::add(ActivityType::CHAPTER_CREATE, $chapter);
+        $category = new Category();
+        $category->priority = (new CategoryContents())->getLastPriority() + 1;
+        $this->baseRepo->create($category, $input);
+        Activity::add(ActivityType::CATEGORY_CREATE, $category);
 
-        return $chapter;
+        return $category;
     }
 
     /**
-     * Update the given chapter.
+     * Update the given category.
      */
-    public function update(Chapter $chapter, array $input): Chapter
+    public function update(Category $category, array $input): Category
     {
-        $this->baseRepo->update($chapter, $input);
-        Activity::add(ActivityType::CHAPTER_UPDATE, $chapter);
+        $this->baseRepo->update($category, $input);
+        Activity::add(ActivityType::CATEGORY_UPDATE, $category);
 
-        return $chapter;
+        return $category;
     }
+
 
     /**
      * Remove a chapter from the system.
      *
      * @throws Exception
      */
-    public function destroy(Chapter $chapter)
+    public function destroy(Category $category)
     {
         $trashCan = new TrashCan();
-        $trashCan->softDestroyChapter($chapter);
-        Activity::add(ActivityType::CHAPTER_DELETE, $chapter);
+        $trashCan->softDestroyChapter($category);
+        Activity::add(ActivityType::CATEGORY_DELETE, $category);
+    //  $this->baseRepo->destroy($category);
         $trashCan->autoClearOld();
     }
 
@@ -83,20 +84,22 @@ class CategoryRepo
      * @throws MoveOperationException
      * @throws PermissionsException
      */
-    public function move(Chapter $chapter, string $parentIdentifier): Book
+
+    //public function move(Category $category, string $parentIdentifier): Category
+    public function move(Category $category, Category $target)
     {
-        $parent = $this->findParentByIdentifier($parentIdentifier);
-        if (is_null($parent)) {
-            throw new MoveOperationException('Book to move chapter into not found');
+        if (!$category->canBeMovedTo($target)) {
+            throw new MoveOperationException(trans('errors.cannot_move_category_to_self'));
         }
 
-        if (!userCan('chapter-create', $parent)) {
-            throw new PermissionsException('User does not have permission to create a chapter within the chosen book');
+        if (!$target->canContain($category)) {
+            throw new PermissionsException(trans('errors.cannot_move_category_to_parent'));
         }
 
-        $chapter->changeBook($parent->id);
-        $chapter->rebuildPermissions();
-        Activity::add(ActivityType::CHAPTER_MOVE, $chapter);
+    //  $category->moveTo($target);
+        $category->changeCategory($parent->id);
+        $category->rebuildPermissions();
+        Activity::add(ActivityType::CATEGORY_MOVE, $category);
 
         return $parent;
     }

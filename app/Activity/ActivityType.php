@@ -10,21 +10,21 @@ class ActivityType
     const PAGE_RESTORE = 'page_restore';
     const PAGE_MOVE = 'page_move';
 
-    const CHAPTER_CREATE = 'chapter_create';
-    const CHAPTER_UPDATE = 'chapter_update';
-    const CHAPTER_DELETE = 'chapter_delete';
-    const CHAPTER_MOVE = 'chapter_move';
+    const CATEGORY_CREATE = 'chapter_create';
+    const CATEGORY_UPDATE = 'chapter_update';
+    const CATEGORY_DELETE = 'chapter_delete';
+    const CATEGORY_MOVE = 'chapter_move';
 
-    const BOOK_CREATE = 'book_create';
-    const BOOK_CREATE_FROM_CHAPTER = 'book_create_from_chapter';
-    const BOOK_UPDATE = 'book_update';
-    const BOOK_DELETE = 'book_delete';
-    const BOOK_SORT = 'book_sort';
+    //const BOOK_CREATE = 'book_create';
+    //const BOOK_CREATE_FROM_CHAPTER = 'book_create_from_chapter';
+    //const BOOK_UPDATE = 'book_update';
+    //const BOOK_DELETE = 'book_delete';
+    //const BOOK_SORT = 'book_sort';
 
-    const BOOKSHELF_CREATE = 'bookshelf_create';
-    const BOOKSHELF_CREATE_FROM_BOOK = 'bookshelf_create_from_book';
-    const BOOKSHELF_UPDATE = 'bookshelf_update';
-    const BOOKSHELF_DELETE = 'bookshelf_delete';
+    //const BOOKSHELF_CREATE = 'bookshelf_create';
+    //const BOOKSHELF_CREATE_FROM_BOOK = 'bookshelf_create_from_book';
+    //const BOOKSHELF_UPDATE = 'bookshelf_update';
+    //const BOOKSHELF_DELETE = 'bookshelf_delete';
 
     const COMMENTED_ON = 'commented_on';
     const COMMENT_CREATE = 'comment_create';

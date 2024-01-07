@@ -221,7 +221,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * Create a copy of a Category within the requested target destination.
+     * Create a copy of a Category within the requested target destination that is another Category.
      *
      * @throws NotFoundException
      * @throws Throwable
