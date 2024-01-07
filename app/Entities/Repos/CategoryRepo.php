@@ -1,12 +1,15 @@
 <?php
 
+// Updated to reflect the new database structure: nested categories for pages
+// Pending further updates for comments... and revisit of the last method
+
 namespace BookStack\Entities\Repos;
 
 use BookStack\Activity\ActivityType;
 //use BookStack\Entities\Models\Book;
 use BookStack\Entities\Models\Category;
 use BookStack\Entities\Models\Entity;
-use BookStack\Entities\Tools\BookContents;
+use BookStack\Entities\Tools\CategoryContents;
 use BookStack\Entities\Tools\TrashCan;
 use BookStack\Exceptions\MoveOperationException;
 use BookStack\Exceptions\NotFoundException;
@@ -103,6 +106,9 @@ class CategoryRepo
 
         return $parent;
     }
+
+
+
 
     /**
      * Find a page parent entity via an identifier string in the format:

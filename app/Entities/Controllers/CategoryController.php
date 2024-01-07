@@ -6,7 +6,9 @@ use BookStack\Activity\Models\View;
 use BookStack\Activity\Tools\UserEntityWatchOptions;
 //use BookStack\Entities\Models\Book;
 use BookStack\Entities\Repos\CategoryRepo;
-//use BookStack\Entities\Tools\BookContents;
+
+use BookStack\Entities\Tools\CategoryContents;
+
 use BookStack\Entities\Tools\Cloner;
 use BookStack\Entities\Tools\HierarchyTransformer;
 use BookStack\Entities\Tools\NextPreviousContentLocator;
