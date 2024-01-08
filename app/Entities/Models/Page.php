@@ -157,7 +157,7 @@ class Page extends Category
      * Get a visible page by its category tree and page slugs.
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public static function getBySlugs(string $categorySlug, string $pageSlug): self 
+    public static function getBySlugs(string $categorySlug, string $pageSlug): Page 
     {
         return static::visible()->whereHas('category', function(Builder $query) use ($categorySlug) {$query->where('slug', $categorySlug);})->where('slug', $pageSlug)->firstOrFail();
     }
