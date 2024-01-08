@@ -92,9 +92,7 @@ class Category extends Model
     public static function getBySlugs(string $categorySlug): Page
     {
       return Page::visible()
-        ->whereHas('category', function(Builder $query) use ($categorySlug) {
-          $query->where('slug', $categorySlug); 
-        })
-        ->firstOrFail();
+         ->where('slug', $categorySlug)
+         ->firstOrFail();
     }
 }
