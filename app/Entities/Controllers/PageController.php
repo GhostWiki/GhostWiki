@@ -41,9 +41,9 @@ class PageController extends Controller
      *
      * @throws Throwable
      */
-    public function create(string $bookSlug, string $chapterSlug = null)
+    public function create(string $categorySlug = null)
     {
-        $parent = $this->pageRepo->getParentFromSlugs($bookSlug, $chapterSlug);
+        $parent = $this->pageRepo->getParentFromSlug($categorySlug);
         $this->checkOwnablePermission('page-create', $parent);
 
         // Redirect to draft edit screen if signed in
@@ -64,13 +64,13 @@ class PageController extends Controller
      *
      * @throws ValidationException
      */
-    public function createAsGuest(Request $request, string $bookSlug, string $chapterSlug = null)
+    public function createAsGuest(Request $request, string $categorySlug = null)
     {
         $this->validate($request, [
             'name' => ['required', 'string', 'max:255'],
         ]);
 
-        $parent = $this->pageRepo->getParentFromSlugs($bookSlug, $chapterSlug);
+        $parent = $this->pageRepo->getParentFromSlug($categorySlug);
         $this->checkOwnablePermission('page-create', $parent);
 
         $page = $this->pageRepo->getNewDraftPage($parent);
@@ -86,7 +86,7 @@ class PageController extends Controller
      *
      * @throws NotFoundException
      */
-    public function editDraft(Request $request, string $bookSlug, int $pageId)
+    public function editDraft(Request $request, string $categorySlug, int $pageId)
     {
         $draft = $this->pageRepo->getById($pageId);
         $this->checkOwnablePermission('page-create', $draft->getParent());
@@ -103,7 +103,7 @@ class PageController extends Controller
      * @throws NotFoundException
      * @throws ValidationException
      */
-    public function store(Request $request, string $bookSlug, int $pageId)
+    public function store(Request $request, string $categorySlug, int $pageId)
     {
         $this->validate($request, [
             'name' => ['required', 'string', 'max:255'],
@@ -122,7 +122,7 @@ class PageController extends Controller
      *
      * @throws NotFoundException
      */
-    public function show(string $bookSlug, string $pageSlug)
+    public function show(string $categorySlug, string $pageSlug)
     {
         try {
             $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
@@ -142,7 +142,7 @@ class PageController extends Controller
         $page->html = $pageContent->render();
         $pageNav = $pageContent->getNavigation($page->html);
 
-        $sidebarTree = (new BookContents($page->book))->getTree();
+        $sidebarTree = (new CategoryContents($page->category))->getTree();
         $commentTree = (new CommentTree($page));
         $nextPreviousLocator = new NextPreviousContentLocator($page, $sidebarTree);
 
@@ -151,7 +151,7 @@ class PageController extends Controller
 
         return view('pages.show', [
             'page'            => $page,
-            'book'            => $page->book,
+            'category'        => $page->category,
             'current'         => $page,
             'sidebarTree'     => $sidebarTree,
             'commentTree'     => $commentTree,
@@ -182,9 +182,9 @@ class PageController extends Controller
      *
      * @throws NotFoundException
      */
-    public function edit(Request $request, string $bookSlug, string $pageSlug)
+    public function edit(Request $request, string $categorySlug, string $pageSlug)
     {
-        $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
+        $page = $this->pageRepo->getBySlug($categorySlug, $pageSlug);
         $this->checkOwnablePermission('page-update', $page);
 
         $editorData = new PageEditorData($page, $this->pageRepo, $request->query('editor', ''));
@@ -203,12 +203,12 @@ class PageController extends Controller
      * @throws ValidationException
      * @throws NotFoundException
      */
-    public function update(Request $request, string $bookSlug, string $pageSlug)
+    public function update(Request $request, string $categorySlug, string $pageSlug)
     {
         $this->validate($request, [
             'name' => ['required', 'string', 'max:255'],
         ]);
-        $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
+        $page = $this->pageRepo->getBySlug($categorySlug, $pageSlug);
         $this->checkOwnablePermission('page-update', $page);
 
         $this->pageRepo->update($page, $request->all());
@@ -258,15 +258,15 @@ class PageController extends Controller
      *
      * @throws NotFoundException
      */
-    public function showDelete(string $bookSlug, string $pageSlug)
+    public function showDelete(string $categorySlug, string $pageSlug)
     {
-        $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
+        $page = $this->pageRepo->getBySlug($categorySlug, $pageSlug);
         $this->checkOwnablePermission('page-delete', $page);
         $this->setPageTitle(trans('entities.pages_delete_named', ['pageName' => $page->getShortName()]));
-        $usedAsTemplate = Book::query()->where('default_template_id', '=', $page->id)->count() > 0;
+        $usedAsTemplate = Category::query()->where('default_template_id', '=', $page->id)->count() > 0;
 
         return view('pages.delete', [
-            'book'    => $page->book,
+            'category'    => $page->category,
             'page'    => $page,
             'current' => $page,
             'usedAsTemplate' => $usedAsTemplate,
@@ -278,15 +278,15 @@ class PageController extends Controller
      *
      * @throws NotFoundException
      */
-    public function showDeleteDraft(string $bookSlug, int $pageId)
+    public function showDeleteDraft(string $categorySlug, int $pageId)
     {
         $page = $this->pageRepo->getById($pageId);
         $this->checkOwnablePermission('page-update', $page);
         $this->setPageTitle(trans('entities.pages_delete_draft_named', ['pageName' => $page->getShortName()]));
-        $usedAsTemplate = Book::query()->where('default_template_id', '=', $page->id)->count() > 0;
+        $usedAsTemplate = Category::query()->where('default_template_id', '=', $page->id)->count() > 0;
 
         return view('pages.delete', [
-            'book'    => $page->book,
+            'category'    => $page->category,
             'page'    => $page,
             'current' => $page,
             'usedAsTemplate' => $usedAsTemplate,
@@ -299,9 +299,9 @@ class PageController extends Controller
      * @throws NotFoundException
      * @throws Throwable
      */
-    public function destroy(string $bookSlug, string $pageSlug)
+    public function destroy(string $categorySlug, string $pageSlug)
     {
-        $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
+        $page = $this->pageRepo->getBySlug($categorySlug, $pageSlug);
         $this->checkOwnablePermission('page-delete', $page);
         $parent = $page->getParent();
 
@@ -319,19 +319,18 @@ class PageController extends Controller
     public function destroyDraft(string $bookSlug, int $pageId)
     {
         $page = $this->pageRepo->getById($pageId);
-        $book = $page->book;
-        $chapter = $page->chapter;
+        $category = $page->category;
         $this->checkOwnablePermission('page-update', $page);
 
         $this->pageRepo->destroy($page);
 
         $this->showSuccessNotification(trans('entities.pages_delete_draft_success'));
 
-        if ($chapter && userCan('view', $chapter)) {
-            return redirect($chapter->getUrl());
-        }
+        if (userCan('view', $category)) {
+            return redirect($category->getUrl()); 
+          }
 
-        return redirect($book->getUrl());
+        return redirect($category->getUrl());
     }
 
     /**
@@ -343,7 +342,7 @@ class PageController extends Controller
             $query->scopes('visible');
         };
 
-        $pages = Page::visible()->with(['updatedBy', 'book' => $visibleBelongsScope, 'chapter' => $visibleBelongsScope])
+        $pages = Page::visible()->with(['updatedBy',  'category' => $visibleBelongsScope])
             ->orderBy('updated_at', 'desc')
             ->paginate(20)
             ->setPath(url('/pages/recently-updated'));
@@ -363,14 +362,14 @@ class PageController extends Controller
      *
      * @throws NotFoundException
      */
-    public function showMove(string $bookSlug, string $pageSlug)
+    public function showMove(string $categorySlug, string $pageSlug)
     {
-        $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
+        $page = $this->pageRepo->getBySlug($categorySlug, $pageSlug);
         $this->checkOwnablePermission('page-update', $page);
         $this->checkOwnablePermission('page-delete', $page);
 
         return view('pages.move', [
-            'book' => $page->book,
+            'category' => $page->category,
             'page' => $page,
         ]);
     }
@@ -381,9 +380,9 @@ class PageController extends Controller
      * @throws NotFoundException
      * @throws Throwable
      */
-    public function move(Request $request, string $bookSlug, string $pageSlug)
+    public function move(Request $request, string $categorySlug, string $pageSlug)
     {
-        $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
+        $page = $this->pageRepo->getBySlug($categorySlug, $pageSlug);
         $this->checkOwnablePermission('page-update', $page);
         $this->checkOwnablePermission('page-delete', $page);
 
@@ -397,7 +396,7 @@ class PageController extends Controller
         } catch (PermissionsException $exception) {
             $this->showPermissionError();
         } catch (Exception $exception) {
-            $this->showErrorNotification(trans('errors.selected_book_chapter_not_found'));
+            $this->showErrorNotification(trans('errors.selected_category_category_not_found'));
 
             return redirect($page->getUrl('/move'));
         }
@@ -410,14 +409,14 @@ class PageController extends Controller
      *
      * @throws NotFoundException
      */
-    public function showCopy(string $bookSlug, string $pageSlug)
+    public function showCopy(string $categorySlug, string $pageSlug)
     {
-        $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
+        $page = $this->pageRepo->getBySlug($categorySlug, $pageSlug);
         $this->checkOwnablePermission('page-view', $page);
         session()->flashInput(['name' => $page->name]);
 
         return view('pages.copy', [
-            'book' => $page->book,
+            'category' => $page->category,
             'page' => $page,
         ]);
     }
@@ -428,16 +427,16 @@ class PageController extends Controller
      * @throws NotFoundException
      * @throws Throwable
      */
-    public function copy(Request $request, Cloner $cloner, string $bookSlug, string $pageSlug)
+    public function copy(Request $request, Cloner $cloner, string $categorySlug, string $pageSlug)
     {
-        $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
+        $page = $this->pageRepo->getBySlug($categorySlug, $pageSlug);
         $this->checkOwnablePermission('page-view', $page);
 
         $entitySelection = $request->get('entity_selection') ?: null;
         $newParent = $entitySelection ? $this->pageRepo->findParentByIdentifier($entitySelection) : $page->getParent();
 
         if (is_null($newParent)) {
-            $this->showErrorNotification(trans('errors.selected_book_chapter_not_found'));
+            $this->showErrorNotification(trans('errors.selected_category_category_not_found'));
 
             return redirect($page->getUrl('/copy'));
         }

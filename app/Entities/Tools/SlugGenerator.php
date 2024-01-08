@@ -1,10 +1,13 @@
 <?php
 
+// Updated to reflect the new database structure: nested categories for pages
+// Pending further updates for comments... 
+
 namespace BookStack\Entities\Tools;
 
 use BookStack\App\Model;
 use BookStack\App\Sluggable;
-use BookStack\Entities\Models\BookChild;
+use BookStack\Entities\Models\CategoryChild;
 use Illuminate\Support\Str;
 
 class SlugGenerator
@@ -16,6 +19,7 @@ class SlugGenerator
     public function generate(Sluggable $model): string
     {
         $slug = $this->formatNameAsSlug($model->name);
+
         while ($this->slugInUse($slug, $model)) {
             $slug .= '-' . Str::random(3);
         }
@@ -29,6 +33,7 @@ class SlugGenerator
     protected function formatNameAsSlug(string $name): string
     {
         $slug = Str::slug($name);
+
         if ($slug === '') {
             $slug = substr(md5(rand(1, 500)), 0, 5);
         }
@@ -39,15 +44,13 @@ class SlugGenerator
     /**
      * Check if a slug is already in-use for this
      * type of model within the same parent.
-     *
-     * @param Sluggable&Model $model
      */
     protected function slugInUse(string $slug, Sluggable $model): bool
     {
         $query = $model->newQuery()->where('slug', '=', $slug);
 
-        if ($model instanceof BookChild) {
-            $query->where('book_id', '=', $model->book_id);
+        if ($model instanceof CategoryChild) {
+            $query->where('category_id', '=', $model->category_id);
         }
 
         if ($model->id) {

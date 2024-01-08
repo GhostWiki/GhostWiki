@@ -1,16 +1,19 @@
 <?php
 
+// Updated to reflect the new database structure: nested categories for pages
+// Pending further updates for comments... 
+
 namespace BookStack\Entities\Tools;
 
 use BookStack\Activity\Models\Tag;
-use BookStack\Entities\Models\Book;
-use BookStack\Entities\Models\Bookshelf;
-use BookStack\Entities\Models\Chapter;
+//use BookStack\Entities\Models\Book;
+//use BookStack\Entities\Models\Bookshelf;
+use BookStack\Entities\Models\Category;
 use BookStack\Entities\Models\Entity;
 use BookStack\Entities\Models\HasCoverImage;
 use BookStack\Entities\Models\Page;
-use BookStack\Entities\Repos\BookRepo;
-use BookStack\Entities\Repos\ChapterRepo;
+//use BookStack\Entities\Repos\BookRepo;
+use BookStack\Entities\Repos\CategoryRepo;
 use BookStack\Entities\Repos\PageRepo;
 use BookStack\Uploads\Image;
 use BookStack\Uploads\ImageService;
@@ -19,15 +22,15 @@ use Illuminate\Http\UploadedFile;
 class Cloner
 {
     protected PageRepo $pageRepo;
-    protected ChapterRepo $chapterRepo;
-    protected BookRepo $bookRepo;
+    protected CategoryRepo $categoryRepo;
+    //protected BookRepo $bookRepo;
     protected ImageService $imageService;
 
-    public function __construct(PageRepo $pageRepo, ChapterRepo $chapterRepo, BookRepo $bookRepo, ImageService $imageService)
+    public function __construct(PageRepo $pageRepo, CategoryRepo $categoryRepo, ImageService $imageService)
     {
         $this->pageRepo = $pageRepo;
-        $this->chapterRepo = $chapterRepo;
-        $this->bookRepo = $bookRepo;
+        $this->categoryRepo = $categoryRepo;
+        //$this->bookRepo = $bookRepo;
         $this->imageService = $imageService;
     }
 
@@ -47,57 +50,64 @@ class Cloner
      * Clone the given page into the given parent using the provided name.
      * Clones all child pages.
      */
-    public function cloneChapter(Chapter $original, Book $parent, string $newName): Chapter
+    /* public function cloneCategory(Category $original, Category $parent, string $newName): Category
     {
-        $chapterDetails = $this->entityToInputData($original);
-        $chapterDetails['name'] = $newName;
+        $categoryDetails = $this->entityToInputData($original);
+        $categoryDetails['name'] = $newName;
 
-        $copyChapter = $this->chapterRepo->create($chapterDetails, $parent);
+        $copyCategory = $this->categoryRepo->create($categoryDetails, $parent);
 
-        if (userCan('page-create', $copyChapter)) {
+        if (userCan('page-create', $copyCategory)) {
             /** @var Page $page */
-            foreach ($original->getVisiblePages() as $page) {
-                $this->clonePage($page, $copyChapter, $page->name);
+            /* foreach ($original->getVisiblePages() as $page) {
+                $this->clonePage($page, $copyCategory, $page->name);
             }
         }
 
-        return $copyChapter;
-    }
+        return $copyCategory;
+    } */
 
+
+
+    
     /**
-     * Clone the given book.
-     * Clones all child chapters & pages.
+     * Clone the given category.
+     * Clones all child categories & pages.
      */
-    public function cloneBook(Book $original, string $newName): Book
+    public function cloneCategory(Category $original, string $newName): Category
     {
-        $bookDetails = $this->entityToInputData($original);
-        $bookDetails['name'] = $newName;
+        $categoryDetails = $this->entityToInputData($original);
+        $categoryDetails['name'] = $newName;
 
-        // Clone book
-        $copyBook = $this->bookRepo->create($bookDetails);
+        // Clone category
+        $copyCategory = $this->categoryRepo->create($categoryDetails);
 
         // Clone contents
         $directChildren = $original->getDirectChildren();
         foreach ($directChildren as $child) {
-            if ($child instanceof Chapter && userCan('chapter-create', $copyBook)) {
-                $this->cloneChapter($child, $copyBook, $child->name);
+            if ($child instanceof Category && userCan('category-create', $copyBook)) {
+                $this->cloneCategory($child, $copyCategory, $child->name);
             }
 
             if ($child instanceof Page && !$child->draft && userCan('page-create', $copyBook)) {
-                $this->clonePage($child, $copyBook, $child->name);
+                $this->clonePage($child, $copyCategory, $child->name);
             }
         }
 
-        // Clone bookshelf relationships
+        // Clone category relationships
         /** @var Bookshelf $shelf */
-        foreach ($original->shelves as $shelf) {
-            if (userCan('bookshelf-update', $shelf)) {
-                $shelf->appendBook($copyBook);
+        foreach ($original->category as $category) {
+            if (userCan('category-update', $category)) {
+                $shelf->appendBook($copyCategory);
             }
         }
 
-        return $copyBook;
+        return $copyCategory;
     }
+
+
+
+
 
     /**
      * Convert an entity to a raw data array of input data.

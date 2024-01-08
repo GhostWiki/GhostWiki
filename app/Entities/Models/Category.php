@@ -26,7 +26,13 @@ class Category extends Model
     protected $fillable = ['name', 'description', 'priority', 'parent_id'];
     protected $hidden = ['pivot', 'deleted_at', 'description_html'];
 
-
+    /**
+     * Get the Page that is used as default template for newly created pages within this Category.
+     */
+    public function defaultTemplate(): BelongsTo
+    {
+        return $this->belongsTo(Page::class, 'default_template_id');
+    }
 
     /**
      * Get the parent category of this category

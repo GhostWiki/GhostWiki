@@ -1,14 +1,15 @@
 <?php
 
+// Updated to reflect the new database structure: nested categories for pages
+// Pending further updates for comments... 
+
 namespace BookStack\Entities\Controllers;
 
 use BookStack\Activity\Models\View;
 use BookStack\Activity\Tools\UserEntityWatchOptions;
 //use BookStack\Entities\Models\Book;
 use BookStack\Entities\Repos\CategoryRepo;
-
 use BookStack\Entities\Tools\CategoryContents;
-
 use BookStack\Entities\Tools\Cloner;
 use BookStack\Entities\Tools\HierarchyTransformer;
 use BookStack\Entities\Tools\NextPreviousContentLocator;
@@ -67,42 +68,41 @@ class CategoryController extends Controller
     /**
      * Display the specified Category.
      */
-    public function show(string $bookSlug, string $chapterSlug)
+    public function show( string $categorySlug)
     {
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
+        $category = $this->categoryRepo->getBySlug($categorySlug);
         $this->checkOwnablePermission('chapter-view', $chapter);
 
-        $sidebarTree = (new BookContents($chapter->book))->getTree();
-        $pages = $chapter->getVisiblePages();
-        $nextPreviousLocator = new NextPreviousContentLocator($chapter, $sidebarTree);
-        View::incrementFor($chapter);
+        $sidebarTree = (new CategoryContents($category))->getTree();
+        $pages = $category->getVisiblePages();
+        $nextPreviousLocator = new NextPreviousContentLocator($category, $sidebarTree);
+        View::incrementFor($category);
 
-        $this->setPageTitle($chapter->getShortName());
+        $this->setPageTitle($category->getShortName());
 
         return view('categories.show', [
-            'book'           => $chapter->book,
-            'chapter'        => $chapter,
-            'current'        => $chapter,
+            'category'       => $category,
+            'current'        => $category,
             'sidebarTree'    => $sidebarTree,
-            'watchOptions'   => new UserEntityWatchOptions(user(), $chapter),
+            'watchOptions'   => new UserEntityWatchOptions(user(), $category),
             'pages'          => $pages,
             'next'           => $nextPreviousLocator->getNext(),
             'previous'       => $nextPreviousLocator->getPrevious(),
-            'referenceCount' => $this->referenceFetcher->getReferenceCountToEntity($chapter),
+            'referenceCount' => $this->referenceFetcher->getReferenceCountToEntity($category),
         ]);
     }
 
     /**
      * Show the form for editing the specified Category.
      */
-    public function edit(string $bookSlug, string $chapterSlug)
+    public function edit(string $categorySlug)
     {
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
-        $this->checkOwnablePermission('chapter-update', $chapter);
+        $category = $this->categoryRepo->getBySlug($categorySlug);
+        $this->checkOwnablePermission('category-update', $category);
 
-        $this->setPageTitle(trans('entities.chapters_edit_named', ['chapterName' => $chapter->getShortName()]));
+        $this->setPageTitle(trans('entities.categories_edit_named', ['categoryName' => $category->getShortName()]));
 
-        return view('chapters.edit', ['book' => $chapter->book, 'chapter' => $chapter, 'current' => $chapter]);
+        return view('categories.edit', ['category' => $category, 'current' => $category]);
     }
 
     /**
@@ -110,7 +110,7 @@ class CategoryController extends Controller
      *
      * @throws NotFoundException
      */
-    public function update(Request $request, string $bookSlug, string $chapterSlug)
+    public function update(Request $request, string $categorySlug)
     {
         $validated = $this->validate($request, [
             'name'             => ['required', 'string', 'max:255'],
@@ -118,12 +118,12 @@ class CategoryController extends Controller
             'tags'             => ['array'],
         ]);
 
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
-        $this->checkOwnablePermission('chapter-update', $chapter);
+        $category = $this->categoryRepo->getBySlug($categorySlug);
+        $this->checkOwnablePermission('category-update', $category);
 
-        $this->chapterRepo->update($chapter, $validated);
+        $this->categoryRepo->update($category, $validated);
 
-        return redirect($chapter->getUrl());
+        return redirect($category->getUrl());
     }
 
     /**
@@ -131,14 +131,14 @@ class CategoryController extends Controller
      *
      * @throws NotFoundException
      */
-    public function showDelete(string $bookSlug, string $chapterSlug)
+    public function showDelete(string $categorySlug)
     {
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
-        $this->checkOwnablePermission('chapter-delete', $chapter);
+        $category = $this->categoryRepo->getBySlug($categorySlug);
+        $this->checkOwnablePermission('category-delete', $category);
 
-        $this->setPageTitle(trans('entities.chapters_delete_named', ['chapterName' => $chapter->getShortName()]));
+        $this->setPageTitle(trans('entities.category_delete_named', ['categoryName' => $category->getShortName()]));
 
-        return view('chapters.delete', ['book' => $chapter->book, 'chapter' => $chapter, 'current' => $chapter]);
+        return view('category.delete', ['category' => $category, 'current' => $category]);
     }
 
     /**
@@ -147,14 +147,14 @@ class CategoryController extends Controller
      * @throws NotFoundException
      * @throws Throwable
      */
-    public function destroy(string $bookSlug, string $chapterSlug)
+    public function destroy(string $categorySlug)
     {
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
-        $this->checkOwnablePermission('chapter-delete', $chapter);
+        $category = $this->categoryRepo->getBySlug($categorySlug);
+        $this->checkOwnablePermission('category-delete', $category);
 
-        $this->chapterRepo->destroy($chapter);
+        $this->categoryRepo->destroy($category);
 
-        return redirect($chapter->book->getUrl());
+        return redirect($category->getUrl());
     }
 
     /**
@@ -162,16 +162,15 @@ class CategoryController extends Controller
      *
      * @throws NotFoundException
      */
-    public function showMove(string $bookSlug, string $chapterSlug)
+    public function showMove(string $categorySlug)
     {
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
-        $this->setPageTitle(trans('entities.chapters_move_named', ['chapterName' => $chapter->getShortName()]));
-        $this->checkOwnablePermission('chapter-update', $chapter);
-        $this->checkOwnablePermission('chapter-delete', $chapter);
+        $category = $this->categoryRepo->getBySlug($categorySlug);
+        $this->setPageTitle(trans('entities.category_move_named', ['categoryName' => $category->getShortName()]));
+        $this->checkOwnablePermission('category-update', $category);
+        $this->checkOwnablePermission('category-delete', $category);
 
-        return view('chapters.move', [
-            'chapter' => $chapter,
-            'book'    => $chapter->book,
+        return view('category.move', [
+            'category' => $category,
         ]);
     }
 
@@ -180,28 +179,28 @@ class CategoryController extends Controller
      *
      * @throws NotFoundException|NotifyException
      */
-    public function move(Request $request, string $bookSlug, string $chapterSlug)
+    public function move(Request $request, string $categorySlug)
     {
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
-        $this->checkOwnablePermission('chapter-update', $chapter);
-        $this->checkOwnablePermission('chapter-delete', $chapter);
+        $category = $this->categoryRepo->getBySlug($categorySlug);
+        $this->checkOwnablePermission('category-update', $category);
+        $this->checkOwnablePermission('category-delete', $category);
 
         $entitySelection = $request->get('entity_selection', null);
         if ($entitySelection === null || $entitySelection === '') {
-            return redirect($chapter->getUrl());
+            return redirect($category->getUrl());
         }
 
         try {
-            $this->chapterRepo->move($chapter, $entitySelection);
+            $this->categoryRepo->move($category, $entitySelection);
         } catch (PermissionsException $exception) {
             $this->showPermissionError();
         } catch (MoveOperationException $exception) {
-            $this->showErrorNotification(trans('errors.selected_book_not_found'));
+            $this->showErrorNotification(trans('errors.selected_category_not_found'));
 
-            return redirect($chapter->getUrl('/move'));
+            return redirect($category->getUrl('/move'));
         }
 
-        return redirect($chapter->getUrl());
+        return redirect($category->getUrl());
     }
 
     /**
@@ -209,16 +208,15 @@ class CategoryController extends Controller
      *
      * @throws NotFoundException
      */
-    public function showCopy(string $bookSlug, string $chapterSlug)
+    public function showCopy(string $categorySlug)
     {
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
-        $this->checkOwnablePermission('chapter-view', $chapter);
+        $category = $this->categoryRepo->getBySlug($categorySlug);
+        $this->checkOwnablePermission('category-view', $category);
 
-        session()->flashInput(['name' => $chapter->name]);
+        session()->flashInput(['name' => $category->name]);
 
-        return view('chapters.copy', [
-            'book'    => $chapter->book,
-            'chapter' => $chapter,
+        return view('category.copy', [
+            'category' => $category,
         ]);
     }
 
@@ -228,27 +226,27 @@ class CategoryController extends Controller
      * @throws NotFoundException
      * @throws Throwable
      */
-    public function copy(Request $request, Cloner $cloner, string $bookSlug, string $chapterSlug)
+    public function copy(Request $request, Cloner $cloner, string $categorySlug)
     {
-        $chapter = $this->chapterRepo->getBySlug($bookSlug, $chapterSlug);
-        $this->checkOwnablePermission('chapter-view', $chapter);
+        $category = $this->categoryRepo->getBySlug($categorySlug);
+        $this->checkOwnablePermission('category-view', $category);
 
         $entitySelection = $request->get('entity_selection') ?: null;
-        $newParentBook = $entitySelection ? $this->chapterRepo->findParentByIdentifier($entitySelection) : $chapter->getParent();
+        $newParentCategory = $entitySelection ? $this->categoryRepo->findParentByIdentifier($entitySelection) : $category->getParent();
 
-        if (is_null($newParentBook)) {
-            $this->showErrorNotification(trans('errors.selected_book_not_found'));
+        if (is_null($newParentCategory)) {
+            $this->showErrorNotification(trans('errors.selected_category_not_found'));
 
-            return redirect($chapter->getUrl('/copy'));
+            return redirect($category->getUrl('/copy'));
         }
 
-        $this->checkOwnablePermission('chapter-create', $newParentBook);
+        $this->checkOwnablePermission('category-create', $newParentCategory);
 
-        $newName = $request->get('name') ?: $chapter->name;
-        $chapterCopy = $cloner->cloneChapter($chapter, $newParentBook, $newName);
-        $this->showSuccessNotification(trans('entities.chapters_copy_success'));
+        $newName = $request->get('name') ?: $category->name;
+        $categoryCopy = $cloner->cloneChapter($category, $newParentCategory, $newName);
+        $this->showSuccessNotification(trans('entities.category_copy_success'));
 
-        return redirect($chapterCopy->getUrl());
+        return redirect($categoryCopy->getUrl());
     }
     
 }

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('updated_by')->index();
             $table->softDeletes();
             $table->unsignedInteger('owned_by')->index();
+            $table->integer('default_template_id')->nullable();
             $table->text('description_html');
         });
     }

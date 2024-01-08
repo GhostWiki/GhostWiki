@@ -1,5 +1,8 @@
 <?php
 
+// Updated to reflect the new database structure: nested categories for pages
+// Pending further updates for comments... 
+
 namespace BookStack\Entities\Repos;
 
 use BookStack\Activity\ActivityType;
@@ -38,7 +41,7 @@ class PageRepo
      *
      * @throws NotFoundException
      */
-    public function getById(int $id, array $relations = ['book']): Page
+    public function getById(int $id, array $relations = ['category']): Page
     {
         /** @var Page $page */
         $page = Page::visible()->with($relations)->find($id);
@@ -51,28 +54,33 @@ class PageRepo
     }
 
     /**
-     * Get a page its book and own slug.
+     * Get a page its category and own slug.
      *
      * @throws NotFoundException
      */
-    public function getBySlug(string $bookSlug, string $pageSlug): Page
+    public function getBySlug(string $categorySlug, string $pageSlug): Page 
     {
-        $page = Page::visible()->whereSlugs($bookSlug, $pageSlug)->first();
+        $page = Page::visible()
+            ->whereHas('category', function($query) use ($categorySlug) {
+                $query->where('slug', $categorySlug);
+            })
+        ->where('slug', $pageSlug)
+        ->first();
 
         if (!$page) {
             throw new NotFoundException(trans('errors.page_not_found'));
         }
 
-        return $page;
+    return $page;
     }
 
     /**
      * Get a page by its old slug but checking the revisions table
      * for the last revision that matched the given page and book slug.
      */
-    public function getByOldSlug(string $bookSlug, string $pageSlug): ?Page
+    public function getByOldSlug(string $categorySlug, string $pageSlug): ?Page
     {
-        $revision = $this->revisionRepo->getBySlugs($bookSlug, $pageSlug);
+        $revision = $this->revisionRepo->getBySlugs($categorySlug, $pageSlug);
 
         return $revision->page ?? null;
     }
@@ -101,13 +109,13 @@ class PageRepo
     /**
      * Get a parent item via slugs.
      */
-    public function getParentFromSlugs(string $bookSlug, string $chapterSlug = null): Entity
+    public function getParentFromSlugs( string $categorySlug = null): Entity
     {
-        if ($chapterSlug !== null) {
-            return Chapter::visible()->whereSlugs($bookSlug, $chapterSlug)->firstOrFail();
+        if ($categorySlug !== null) {
+            return Category::visible()->whereSlugs($categorySlug)->firstOrFail();
         }
 
-        return Book::visible()->where('slug', '=', $bookSlug)->firstOrFail();
+        return Category::visible()->where('slug', '=', $categorySlug)->firstOrFail();
     }
 
     /**
@@ -131,14 +139,14 @@ class PageRepo
             'draft'      => true,
         ]);
 
-        if ($parent instanceof Chapter) {
-            $page->chapter_id = $parent->id;
-            $page->book_id = $parent->book_id;
+        if ($parent instanceof Category) {
+            $page->category_id = $parent->id;
+            //$page->book_id = $parent->book_id;
         } else {
-            $page->book_id = $parent->id;
+            $page->category_id = $parent->id;
         }
 
-        $defaultTemplate = $page->book->defaultTemplate;
+        $defaultTemplate = $page->category->defaultTemplate;
         if ($defaultTemplate && userCan('view', $defaultTemplate)) {
             $page->forceFill([
                 'html'  => $defaultTemplate->html,
@@ -317,32 +325,32 @@ class PageRepo
     }
 
     /**
-     * Move the given page into a new parent book or chapter.
-     * The $parentIdentifier must be a string of the following format:
-     * 'book:<id>' (book:5).
-     *
-     * @throws MoveOperationException
-     * @throws PermissionsException
-     */
-    public function move(Page $page, string $parentIdentifier): Entity
+    * Move the given page into a new parent category. 
+    * The $parentIdentifier must be a string of the format:
+    * 'category:<id>' (category:5).
+    *
+    * @throws MoveOperationException
+    * @throws PermissionsException
+    */
+    public function move(Page $page, string $parentIdentifier): Category
     {
-        $parent = $this->findParentByIdentifier($parentIdentifier);
-        if (is_null($parent)) {
-            throw new MoveOperationException('Book or chapter to move page into not found');
-        }
-
-        if (!userCan('page-create', $parent)) {
-            throw new PermissionsException('User does not have permission to create a page within the new parent');
-        }
-
-        $page->chapter_id = ($parent instanceof Chapter) ? $parent->id : null;
-        $newBookId = ($parent instanceof Chapter) ? $parent->book->id : $parent->id;
-        $page->changeBook($newBookId);
-        $page->rebuildPermissions();
-
-        Activity::add(ActivityType::PAGE_MOVE, $page);
-
-        return $parent;
+      $parent = $this->findParentByIdentifier($parentIdentifier);
+    
+      if (is_null($parent)) {
+        throw new MoveOperationException('Category to move page into not found');
+      }
+    
+      if (!userCan('page-create', $parent)) {
+        throw new PermissionsException('User does not have permission to create a page within the new parent category');
+      }
+    
+      $page->category_id = $parent->id;
+    
+      $page->rebuildPermissions();
+    
+      Activity::add(ActivityType::PAGE_MOVE, $page);
+    
+      return $parent;
     }
 
     /**
@@ -352,34 +360,33 @@ class PageRepo
      *
      * @throws MoveOperationException
      */
-    public function findParentByIdentifier(string $identifier): ?Entity
+    public function findParentByIdentifier(string $identifier): ?Category
     {
-        $stringExploded = explode(':', $identifier);
-        $entityType = $stringExploded[0];
-        $entityId = intval($stringExploded[1]);
-
-        if ($entityType !== 'book' && $entityType !== 'chapter') {
-            throw new MoveOperationException('Pages can only be in books or chapters');
-        }
-
-        $parentClass = $entityType === 'book' ? Book::class : Chapter::class;
-
-        return $parentClass::visible()->where('id', '=', $entityId)->first();
+      $stringExploded = explode(':', $identifier);
+      $entityType = $stringExploded[0]; 
+      $entityId = intval($stringExploded[1]);
+    
+      if ($entityType !== 'category') {
+        throw new MoveOperationException('Pages can only be in categories');
+      }
+    
+      return Category::visible()->find($entityId);
     }
 
     /**
      * Get a new priority for a page.
      */
-    protected function getNewPriority(Page $page): int
+    protected function getNewPriority(Page $page): int 
     {
         $parent = $page->getParent();
-        if ($parent instanceof Chapter) {
-            /** @var ?Page $lastPage */
-            $lastPage = $parent->pages('desc')->first();
 
-            return $lastPage ? $lastPage->priority + 1 : 0;
+        if ($parent instanceof Category) {
+        /** @var ?Page $lastPage */
+        $lastPage = $parent->pages('desc')->first();
+
+        return $lastPage ? $lastPage->priority + 1 : 0;
         }
 
-        return (new BookContents($page->book))->getLastPriority() + 1;
+    return (new CategoryContents($page->category))->getLastPriority() + 1;
     }
 }
