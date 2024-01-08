@@ -3,12 +3,12 @@
 namespace BookStack\App;
 
 use BookStack\Activity\ActivityQueries;
-use BookStack\Entities\Models\Book;
+//use BookStack\Entities\Models\Book;
 use BookStack\Entities\Models\Page;
 use BookStack\Entities\Queries\RecentlyViewed;
 use BookStack\Entities\Queries\TopFavourites;
-use BookStack\Entities\Repos\BookRepo;
-use BookStack\Entities\Repos\BookshelfRepo;
+//use BookStack\Entities\Repos\BookRepo;
+//use BookStack\Entities\Repos\BookshelfRepo;
 use BookStack\Entities\Tools\PageContent;
 use BookStack\Http\Controller;
 use BookStack\Uploads\FaviconHandler;
