@@ -89,8 +89,12 @@ class Category extends Model
      * Get a visible chapter by its book and page slugs.
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public static function getBySlugs(string $categorySlug): self
+    public static function getBySlugs(string $categorySlug): Page
     {
-        return static::visible()->whereSlugs($categorySlug)->firstOrFail();
+      return Page::visible()
+        ->whereHas('category', function(Builder $query) use ($categorySlug) {
+          $query->where('slug', $categorySlug); 
+        })
+        ->firstOrFail();
     }
 }
