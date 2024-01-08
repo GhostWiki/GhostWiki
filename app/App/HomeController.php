@@ -30,7 +30,7 @@ class HomeController extends Controller
                 ->where('draft', '=', true)
                 ->where('created_by', '=', user()->id)
                 ->orderBy('updated_at', 'desc')
-                ->with('book')
+                ->with('category')
                 ->take(6)
                 ->get();
         }
@@ -40,14 +40,14 @@ class HomeController extends Controller
             (new RecentlyViewed())->run(12 * $recentFactor, 1)
             : Book::visible()->orderBy('created_at', 'desc')->take(12 * $recentFactor)->get();
         $favourites = (new TopFavourites())->run(6);
-        $recentlyUpdatedPages = Page::visible()->with('book')
+        $recentlyUpdatedPages = Page::visible()->with('category')
             ->where('draft', false)
             ->orderBy('updated_at', 'desc')
             ->take($favourites->count() > 0 ? 5 : 10)
             ->select(Page::$listAttributes)
             ->get();
 
-        $homepageOptions = ['default', 'books', 'bookshelves', 'page'];
+        $homepageOptions = ['default', 'page'];
         $homepageOption = setting('app-homepage-type', 'default');
         if (!in_array($homepageOption, $homepageOptions)) {
             $homepageOption = 'default';
@@ -60,7 +60,7 @@ class HomeController extends Controller
             'draftPages'           => $draftPages,
             'favourites'           => $favourites,
         ];
-
+/* 
         // Add required list ordering & sorting for books & shelves views.
         if ($homepageOption === 'bookshelves' || $homepageOption === 'books') {
             $key = $homepageOption;
@@ -89,7 +89,7 @@ class HomeController extends Controller
             $data = array_merge($commonData, ['books' => $books]);
 
             return view('home.books', $data);
-        }
+        } */
 
         if ($homepageOption === 'page') {
             $homepageSetting = setting('app-homepage', '0:');
