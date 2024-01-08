@@ -27,6 +27,8 @@ return new class extends Migration
             $table->unsignedInteger('owned_by')->index();
             $table->integer('default_template_id')->nullable();
             $table->text('description_html');
+
+            $table->primary(['id', 'parent_id']);
         });
     }
 
