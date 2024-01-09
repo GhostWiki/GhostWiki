@@ -36,6 +36,13 @@ abstract class CategoryChild extends Entity
         });
     }
 
+    // Add baseQuery scope
+    public function scopeBaseQuery($query)
+    {
+    return $query;
+    }
+
+
     /**
      * Scope query to find by category slug and child slug
      */
