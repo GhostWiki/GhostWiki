@@ -125,9 +125,9 @@ class PageController extends Controller
     public function show(string $categorySlug, string $pageSlug)
     {
         try {
-            $page = $this->pageRepo->getBySlug($bookSlug, $pageSlug);
+            $page = $this->pageRepo->getBySlug($categorySlug, $pageSlug);
         } catch (NotFoundException $e) {
-            $page = $this->pageRepo->getByOldSlug($bookSlug, $pageSlug);
+            $page = $this->pageRepo->getByOldSlug($categorySlug, $pageSlug);
 
             if ($page === null) {
                 throw $e;
@@ -172,7 +172,7 @@ class PageController extends Controller
     {
         $page = $this->pageRepo->getById($pageId);
         $page->setHidden(array_diff($page->getHidden(), ['html', 'markdown']));
-        $page->makeHidden(['book']);
+        $page->makeHidden(['category']);
 
         return response()->json($page);
     }
@@ -316,7 +316,7 @@ class PageController extends Controller
      * @throws NotFoundException
      * @throws Throwable
      */
-    public function destroyDraft(string $bookSlug, int $pageId)
+    public function destroyDraft(string $categorySlug, int $pageId)
     {
         $page = $this->pageRepo->getById($pageId);
         $category = $page->category;
