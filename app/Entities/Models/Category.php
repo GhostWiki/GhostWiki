@@ -43,7 +43,7 @@ class Category extends Model
     */
     public static function getBySlug(string $slug): self
     {
-    return static::visible()->where('slug', '=', $slug)->firstOrFail();
+        return Entity::query()->visible()->where('slug', '=', $slug)->firstOrFail();
     }
 
     /**
