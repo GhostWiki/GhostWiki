@@ -38,7 +38,7 @@ class HomeController extends Controller
         $recentFactor = count($draftPages) > 0 ? 0.5 : 1;
         $recents = $this->isSignedIn() ?
             (new RecentlyViewed())->run(12 * $recentFactor, 1)
-            : Book::visible()->orderBy('created_at', 'desc')->take(12 * $recentFactor)->get();
+            : Category::visible()->orderBy('created_at', 'desc')->take(12 * $recentFactor)->get();
         $favourites = (new TopFavourites())->run(6);
         $recentlyUpdatedPages = Page::visible()->with('category')
             ->where('draft', false)
