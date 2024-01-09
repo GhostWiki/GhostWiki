@@ -26,6 +26,12 @@ class Category extends Model
     protected $fillable = ['name', 'description', 'priority', 'parent_id'];
     protected $hidden = ['pivot', 'deleted_at', 'description_html'];
 
+
+    public function subCategories(): HasMany
+    {
+      return $this->hasMany(Category::class, 'parent_id');
+    }
+    
     /**
     * Get the direct child items within this category.
     */
