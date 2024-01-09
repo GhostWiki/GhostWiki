@@ -49,7 +49,7 @@ class Category extends Model
     */
     public static function getBySlug(string $slug): self
     {
-        return static::baseQuery()->joinPermissions()->where('slug', '=', $slug)->firstOrFail();
+        return static::visible()->where('slug', '=', $slug)->firstOrFail();
     }
 
     /**
