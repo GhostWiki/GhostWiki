@@ -44,6 +44,10 @@
     @stack('translations')
 </head>
 <body
+
+@section('content') Hello World!
+
+@endsection
     @if(setting()->getForCurrentUser('ui-shortcuts-enabled', false))
         component="shortcuts"
         option:shortcuts:key-map="{{ \BookStack\Settings\UserShortcutMap::fromUserPreferences()->toJson() }}"
