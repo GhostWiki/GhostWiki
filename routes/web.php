@@ -50,8 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/shelves/{slug}/references', [ReferenceController::class, 'shelf']); */
 
     // Book Creation
-    Route::get('/shelves/{shelfSlug}/create-book', [EntityControllers\BookController::class, 'create']);
-    Route::post('/shelves/{shelfSlug}/create-book', [EntityControllers\BookController::class, 'store']);
+   // Route::get('/shelves/{shelfSlug}/create-book', [EntityControllers\BookController::class, 'create']);
+   // Route::post('/shelves/{shelfSlug}/create-book', [EntityControllers\BookController::class, 'store']);
     Route::get('/create-book', [EntityControllers\BookController::class, 'create']);
 
     // Books
@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/books/{bookSlug}/export/plaintext', [EntityControllers\BookExportController::class, 'plainText']); */
 
     // Pages
+    
     Route::get('/category/{categorySlug}/create-page', [EntityControllers\PageController::class, 'create']);
     Route::post('/category/{categorySlug}/create-guest-page', [EntityControllers\PageController::class, 'createAsGuest']);
     Route::get('/category/{categorySlug}/draft/{pageId}', [EntityControllers\PageController::class, 'editDraft']);

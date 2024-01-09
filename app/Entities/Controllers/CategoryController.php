@@ -41,7 +41,7 @@ class CategoryController extends Controller
 
         $this->setPageTitle(trans('entities.category_create'));
 
-        return view('category.create', ['category' => $category, 'current' => $category]);
+        return view('categories.create', ['category' => $category, 'current' => $category]);
     }
 
     /**
@@ -138,7 +138,7 @@ class CategoryController extends Controller
 
         $this->setPageTitle(trans('entities.category_delete_named', ['categoryName' => $category->getShortName()]));
 
-        return view('category.delete', ['category' => $category, 'current' => $category]);
+        return view('categories.delete', ['category' => $category, 'current' => $category]);
     }
 
     /**
@@ -169,7 +169,7 @@ class CategoryController extends Controller
         $this->checkOwnablePermission('category-update', $category);
         $this->checkOwnablePermission('category-delete', $category);
 
-        return view('category.move', [
+        return view('categories.move', [
             'category' => $category,
         ]);
     }
@@ -215,7 +215,7 @@ class CategoryController extends Controller
 
         session()->flashInput(['name' => $category->name]);
 
-        return view('category.copy', [
+        return view('categories.copy', [
             'category' => $category,
         ]);
     }

@@ -1,4 +1,4 @@
-@extends('layouts.simple')
+{{-- @extends('layouts.simple') --}}
 
 @section('content')
 
