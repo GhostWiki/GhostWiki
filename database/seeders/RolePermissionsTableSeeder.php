@@ -194,8 +194,8 @@ class RolePermissionsTableSeeder extends Seeder
             19 => 
             array (
                 'id' => 38,
-                'name' => 'chapter-update-all',
-                'display_name' => 'Update All Chapters',
+                'name' => 'category-update-all',
+                'display_name' => 'Update All Categories',
                 'description' => NULL,
                 'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
                 'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
@@ -203,8 +203,8 @@ class RolePermissionsTableSeeder extends Seeder
             20 => 
             array (
                 'id' => 39,
-                'name' => 'chapter-update-own',
-                'display_name' => 'Update Own Chapters',
+                'name' => 'category-update-own',
+                'display_name' => 'Update Own Category',
                 'description' => NULL,
                 'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
                 'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
@@ -212,8 +212,8 @@ class RolePermissionsTableSeeder extends Seeder
             21 => 
             array (
                 'id' => 40,
-                'name' => 'chapter-delete-all',
-                'display_name' => 'Delete All Chapters',
+                'name' => 'category-delete-all',
+                'display_name' => 'Delete All Categories',
                 'description' => NULL,
                 'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
                 'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
@@ -221,8 +221,8 @@ class RolePermissionsTableSeeder extends Seeder
             22 => 
             array (
                 'id' => 41,
-                'name' => 'chapter-delete-own',
-                'display_name' => 'Delete Own Chapters',
+                'name' => 'category-delete-own',
+                'display_name' => 'Delete Own Categories',
                 'description' => NULL,
                 'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
                 'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
@@ -446,8 +446,8 @@ class RolePermissionsTableSeeder extends Seeder
             47 => 
             array (
                 'id' => 66,
-                'name' => 'bookshelf-view-all',
-                'display_name' => 'View All BookShelves',
+                'name' => 'category-view-all',
+                'display_name' => 'View All Categories',
                 'description' => NULL,
                 'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
                 'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
@@ -455,8 +455,8 @@ class RolePermissionsTableSeeder extends Seeder
             48 => 
             array (
                 'id' => 67,
-                'name' => 'bookshelf-view-own',
-                'display_name' => 'View Own BookShelves',
+                'name' => 'category-view-own',
+                'display_name' => 'View Own Categories',
                 'description' => NULL,
                 'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
                 'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
