@@ -27,6 +27,26 @@ class Category extends Model
     protected $hidden = ['pivot', 'deleted_at', 'description_html'];
 
     /**
+    * Get the direct child items within this category.
+    */
+    public function getDirectChildren(): Collection
+    {
+        $pages = $this->directPages()->scopes('visible')->get(); 
+        $subCategories = $this->subCategories()->scopes('visible')->get();
+
+    return $pages->concat($subCategories)->sortBy('priority')->sortByDesc('draft');
+    }
+
+    /**
+    * Get a visible category by its slug.
+    * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+    */
+    public static function getBySlug(string $slug): self
+    {
+    return static::visible()->where('slug', '=', $slug)->firstOrFail();
+    }
+
+    /**
      * Get the Page that is used as default template for newly created pages within this Category.
      */
     public function defaultTemplate(): BelongsTo
