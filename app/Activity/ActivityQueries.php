@@ -3,8 +3,8 @@
 namespace BookStack\Activity;
 
 use BookStack\Activity\Models\Activity;
-use BookStack\Entities\Models\Book;
-use BookStack\Entities\Models\Chapter;
+//use BookStack\Entities\Models\Book;
+use BookStack\Entities\Models\Category;
 use BookStack\Entities\Models\Entity;
 use BookStack\Entities\Models\Page;
 use BookStack\Permissions\PermissionApplicator;
@@ -44,14 +44,15 @@ class ActivityQueries
     public function entityActivity(Entity $entity, int $count = 20, int $page = 1): array
     {
         /** @var array<string, int[]> $queryIds */
-        $queryIds = [$entity->getMorphClass() => [$entity->id]];
+        $queryIds = [(new Page())->getMorphClass() => []];
 
-        if ($entity instanceof Book) {
-            $queryIds[(new Chapter())->getMorphClass()] = $entity->chapters()->scopes('visible')->pluck('id');
+        if ($entity instanceof Category) {
+           $queryIds[(new Category())->getMorphClass()] = $entity->categories()->scopes('visible')->pluck('id');  
+           $queryIds[(new Page())->getMorphClass()] = $entity->pages()->pluck('id');
         }
-        if ($entity instanceof Book || $entity instanceof Chapter) {
+/*         if ($entity instanceof Book || $entity instanceof Chapter) {
             $queryIds[(new Page())->getMorphClass()] = $entity->pages()->scopes('visible')->pluck('id');
-        }
+        } */
 
         $query = Activity::query();
         $query->where(function (Builder $query) use ($queryIds) {
